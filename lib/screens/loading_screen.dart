@@ -1,10 +1,8 @@
-import 'dart:convert';
-
-import 'package:clima_new/services/location.dart';
+import 'package:clima_new/services/weather.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-const apiKey = '3abd6414bfb20a1e4202d7119ee3be95';
+import 'location_screen.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -12,32 +10,47 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class LoadingScreenState extends State<LoadingScreen> {
-  double? latitude;
-  double? longitude;
+  // double? latitude;
+  // double? longitude;
 
   @override //only called once
   void initState() {
     super.initState();
-    getLocation();
+    getLocationData();
   }
 
-  void getLocation() async {
-    Location location = Location();
-    await location.getCurrentLocation();
-    latitude = location.latitude;
-    longitude = location.longitude;
+  void getLocationData() async {
+    WeatherModel weatherModel = WeatherModel();
+    var weatherData = await weatherModel.getLocationWeather();
 
-    getData();
-  }
-
-  void getData() async {
-    http.Response response = await http.get(
-      Uri.parse(
-          'https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey'),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return LocationScreen(
+            locationWeather: weatherData,
+          );
+        },
+      ),
     );
-    // print(response.statusCode);
+  }
 
-    /* HTTP return codes cheat sheet:
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SpinKitRotatingCircle(
+          color: Colors.white,
+          size: 100.0,
+        ),
+      ),
+    );
+  }
+}
+
+// print(response.statusCode);
+
+/* HTTP return codes cheat sheet:
     1**. Hold ons
     2**. Here you go
     3**. Go away
@@ -45,35 +58,17 @@ class LoadingScreenState extends State<LoadingScreen> {
     5**. Server screwed up
      */
 
-    // print(response.body);
-    if (response.statusCode == 200) {
-      String data = response.body;
-      //print(data);
+// print(response.body);
 
-      // var longitude = jsonDecode(data)['coord']['lon'];
-      // print(longitude);
+//print(data);
 
-      // var weatherDescription = jsonDecode(data)['weather'][0]['description'];
-      // print(weatherDescription);
+// var longitude = jsonDecode(data)['coord']['lon'];
+// print(longitude);
 
-      var decodedData = jsonDecode(data); //keep as a var to make it dynamic
+// var weatherDescription = jsonDecode(data)['weather'][0]['description'];
+// print(weatherDescription);
 
-      double temp = decodedData['main']['temp'];
-      print(temp);
-      int condition = decodedData['weather'][0]['id'];
-      print(condition);
-      String cityName = decodedData['name'];
-      print(cityName);
-    } else {
-      print(response.statusCode);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
-  }
-}
+//keep as a var to make it dynamic
 
 // void getLocation() async {
 //   LocationPermission permission;
